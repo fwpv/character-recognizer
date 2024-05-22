@@ -33,9 +33,22 @@ PACKED_STRUCT_BEGIN BitmapInfoHeader {
 }
 PACKED_STRUCT_END
 
+PACKED_STRUCT_BEGIN RgbQuad {
+    uint8_t b;
+    uint8_t g;
+    uint8_t r;
+    uint8_t reserved;
+}
+PACKED_STRUCT_END
+
 // функция вычисления отступа по ширине
-static int GetBMPStride(int w) {
-    return 4 * ((w * 3 + 3) / 4);
+static int GetBMPStride(int w, uint16_t bpp = 24) {
+    assert(bpp == 24 || bpp == 8);
+    if (bpp == 24) {
+        return 4 * ((w * 3 + 3) / 4);
+    } else {
+        return 4 * ((w + 3) / 4);
+    }
 }
 
 bool SaveBMP(const Path& file, const Image& image) {
@@ -104,29 +117,50 @@ Image LoadBMP(const Path& file) {
     BitmapInfoHeader info_header;
     ifs.read(reinterpret_cast<char*>(&info_header), sizeof(BitmapInfoHeader));
 
-    // Поддерживается только формат с 24 цветами на пиксель, без сжатия
+    // Поддерживается формат с 24 или 8 цветами на пиксель, без сжатия
     if (info_header.planes != 1
-        || info_header.bpp != 24
+        || !(info_header.bpp == 8 || info_header.bpp == 24)
         || info_header.compression_type != 0) {
         return {};
     }
 
     int w = info_header.width;
     int h = info_header.height;
-    int stride = GetBMPStride(w);
+    int stride = GetBMPStride(w, info_header.bpp);
 
     Image iamge(w, h, Color::Black());
     std::vector<char> buff(stride);
+
+    // Палитра для 8-битных bmp
+    std::vector<Color> palette;
+    if (info_header.bpp == 8) {
+        palette.resize(256);
+        for (int i = 0; i < 256; ++i) {
+            RgbQuad quad;
+            ifs.read(reinterpret_cast<char*>(&quad), sizeof(RgbQuad));
+            palette[i] = Color{static_cast<byte>(quad.r),
+                               static_cast<byte>(quad.g),
+                               static_cast<byte>(quad.b),
+                               static_cast<byte>(0)};
+        }
+    }
 
     // Прочитать данные
     for (int y = h - 1; y >= 0; --y) {
         Color* line = iamge.GetLine(y);
         ifs.read(buff.data(), buff.size());
 
-        for (int x = 0; x < w; ++x) {
-            line[x].b = static_cast<byte>(buff[x * 3 + 0]);
-            line[x].g = static_cast<byte>(buff[x * 3 + 1]);
-            line[x].r = static_cast<byte>(buff[x * 3 + 2]);
+        if (info_header.bpp == 24) {
+            for (int x = 0; x < w; ++x) {
+                line[x].b = static_cast<byte>(buff[x * 3 + 0]);
+                line[x].g = static_cast<byte>(buff[x * 3 + 1]);
+                line[x].r = static_cast<byte>(buff[x * 3 + 2]);
+            }
+        } else { // info_header.bpp == 8
+            for (int x = 0; x < w; ++x) {
+                uint8_t index = static_cast<uint8_t>(buff[x]);
+                line[x] = palette[index];
+            }
         }
     }
 
