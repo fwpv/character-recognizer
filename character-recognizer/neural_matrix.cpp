@@ -58,7 +58,7 @@ void NeuralMatrix::InitializeBiasesWithRandom(float min, float max) {
     }
 }
 
-void NeuralMatrix::CalculateOutput(const std::vector<float>& values) {
+void NeuralMatrix::CalculateOutput(const std::vector<float>& values) noexcept {
     assert(values.size() == n_);
     neurons[0] = values;
 
@@ -92,7 +92,7 @@ float NeuralMatrix::EvaluateError(const std::vector<float>& target) const {
     return EvaluateError(target, n_);
 }
 
-void NeuralMatrix::PropagateErrorBack(const std::vector<float>& target) {
+void NeuralMatrix::PropagateErrorBack(const std::vector<float>& target) noexcept {
     assert(target.size() == n_);
 
     // Calculate the error on the output layer

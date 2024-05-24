@@ -11,10 +11,10 @@ public:
     void InitializeWeightsWithRandom();
     void InitializeBiasesWithRandom(float min = 0.0f, float max = 0.1f);
 
-    void CalculateOutput(const std::vector<float>& input);
+    void CalculateOutput(const std::vector<float>& input) noexcept;
     float EvaluateError(const std::vector<float>& target, size_t size) const;
     float EvaluateError(const std::vector<float>& target) const;
-    void PropagateErrorBack(const std::vector<float>& target);
+    void PropagateErrorBack(const std::vector<float>& target) noexcept;
     const std::vector<float>& ReadOutput() const;
 
     void SetLearningCoefficient(float eta);
