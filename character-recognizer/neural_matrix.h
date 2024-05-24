@@ -12,6 +12,7 @@ public:
     void InitializeBiasesWithRandom(float min = 0.0f, float max = 0.1f);
 
     void CalculateOutput(const std::vector<float>& input);
+    float EvaluateError(const std::vector<float>& target, size_t size) const;
     float EvaluateError(const std::vector<float>& target) const;
     void PropagateErrorBack(const std::vector<float>& target);
     const std::vector<float>& ReadOutput() const;
@@ -25,8 +26,8 @@ private:
     std::vector<std::vector<float>> neurons;
     
     // first index - interlayer number (interlayers = m - 1)
-    // second index - neuron of a neuron in current layer
-    // third index - neuron of a neuron in previous layer
+    // third index - neuron of a neuron in current layer
+    // second index - neuron of a neuron in previous layer
     // value - weight [-1..1]
     std::vector<std::vector<std::vector<float>>> weights;
 
