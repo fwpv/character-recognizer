@@ -66,15 +66,18 @@ void TrainingDatabase::BuildFromFolder(const std::filesystem::path& folder) {
     for (const auto& sub : directory_iterator(folder)) {
         if (sub.is_directory()) {
             std::string name = sub.path().filename().string();
-            if (name.size() != 1) {
-                throw std::runtime_error(name + " is not a char"s);
-            }
             if (is_empty(sub)) {
-                throw std::runtime_error(sub.path().string() + " is empty"s);
+                continue;
             }
-            Data& data = data_dict_[name[0]];
-            for (const auto& file : directory_iterator(sub)) {
-                data.push_back(file_normalizer_->Load(file.path()));
+            if (name.size() == 1) {
+                Data& data = data_dict_[name[0]];
+                for (const auto& file : directory_iterator(sub)) {
+                    data.push_back(file_normalizer_->Load(file.path()));
+                }
+            } else { // not symbols
+                for (const auto& file : directory_iterator(sub)) {
+                    non_char_data_.push_back(file_normalizer_->Load(file.path()));
+                }
             }
         }
     }
@@ -84,7 +87,11 @@ const TrainingDatabase::DataDict& TrainingDatabase::GetDataDictionary() const {
     return data_dict_;
 }
 
-std::vector<char> TrainingDatabase::GetUploadedCharacters() const {
+const TrainingDatabase::Data& TrainingDatabase::GetNonCharData() const {
+    return non_char_data_;
+}
+
+std::vector<char> TrainingDatabase::GetUploadedChars() const {
     std::vector<char> chars;
     chars.reserve(data_dict_.size());
     for (auto it : data_dict_) {

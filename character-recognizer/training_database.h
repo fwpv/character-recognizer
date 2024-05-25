@@ -31,9 +31,11 @@ public:
     void BuildFromFolder(const std::filesystem::path& folder);
 
     const DataDict& GetDataDictionary() const;
-    std::vector<char> GetUploadedCharacters() const;
+    const Data& GetNonCharData() const;
+    std::vector<char> GetUploadedChars() const;
 
 private:
-    DataDict data_dict_;
     const FileNormalizerInterface* file_normalizer_;
+    DataDict data_dict_;
+    Data non_char_data_;
 };
