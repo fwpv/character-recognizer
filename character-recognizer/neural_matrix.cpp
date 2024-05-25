@@ -104,6 +104,8 @@ void NeuralMatrix::PropagateErrorBack(const std::vector<float>& target) noexcept
 
     // Calculate errors for inner layers
     for (int l = m_ - 2; l >= 0; --l) {
+        std::fill(errors[l].begin(), errors[l].end(), 0.0f);
+        
         for (size_t j = 0; j < n_; ++j) {
             float error_next = errors[l + 1][j];
             for (size_t i = 0; i < n_; ++i) {
