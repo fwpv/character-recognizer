@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.11)
 project(Negate CXX)
 set(CMAKE_CXX_STANDARD 17)
 
+# Uncomment if maximum optimizations are needed
+# (It boosts performance by 3.7% on the core i5 8600k)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
+
 set(RECOGNIZER_FILES
     main.cpp
     neural_matrix.h neural_matrix.cpp
