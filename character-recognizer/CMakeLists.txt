@@ -11,6 +11,7 @@ set(RECOGNIZER_FILES
     main.cpp
     neural_matrix.h neural_matrix.cpp
     training_database.h training_database.cpp
+    training.h training.cpp
     profiler.h)
 
 add_subdirectory(ImgLib ImgLibBuildDir)

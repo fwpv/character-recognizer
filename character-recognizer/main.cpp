@@ -1,9 +1,6 @@
 #include "neural_matrix.h"
 #include "profiler.h"
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
+#include "training.h"
 
 void RunTests() {
     {
@@ -14,6 +11,7 @@ void RunTests() {
 
 int main(/*int argc, char** argv*/) {
     RunTests();
+    RunExperiment1();
 
     return 0;
 }
