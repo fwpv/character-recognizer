@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <vector>
 
 using namespace std::filesystem;
@@ -27,12 +28,17 @@ void RunExperiment1() {
         vec[pos] = 1;
     };
 
+    auto clear = [](std::vector<float>& vec) {
+        std::fill(vec.begin(), vec.begin() + 10, 0.0f);
+    };
+
     std::vector<float> resources(1024, 0.0f);
 
     // Training
     {
         LOG_DURATION("Training"s);
         const TrainingDatabase::DataDict& dict = db.GetDataDictionary();
+        const TrainingDatabase::Data& not_chars = db.GetNonCharData();
         for (auto& it : dict) {
             char c = it.first;
             if (c < '0' || c > '9') {
@@ -47,6 +53,10 @@ void RunExperiment1() {
                 for (auto& vec : it.second) {
                     nm.CalculateOutput(vec);
                     set_unit(resources, number);
+                    nm.PropagateErrorBack(resources);
+                    auto& ns_vec = not_chars[rand() % not_chars.size()];
+                    nm.CalculateOutput(ns_vec);
+                    clear(resources);
                     nm.PropagateErrorBack(resources);
                 }
             }
