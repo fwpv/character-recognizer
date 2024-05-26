@@ -31,14 +31,14 @@ NeuralMatrix::NeuralMatrix(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
     weights.resize(h_l + 1);
     for (size_t l = 0; l < h_l + 1; ++l) {
         if (l == 0) {
-            weights[l].resize(i_n);
-            for (auto& edges : weights[l]) {
-                edges.resize(h_n);
-            }
-        } else if (l == h_l) {
             weights[l].resize(h_n);
             for (auto& edges : weights[l]) {
-                edges.resize(o_n);
+                edges.resize(i_n);
+            }
+        } else if (l == h_l) {
+            weights[l].resize(o_n);
+            for (auto& edges : weights[l]) {
+                edges.resize(h_n);
             }
         } else {
             weights[l].resize(h_n);
@@ -97,7 +97,7 @@ void NeuralMatrix::CalculateOutput(const std::vector<float>& input) noexcept {
             float net_i = 0;
             const auto& prev_layer = (l == 0) ? input_layer : hidden_layers[l - 1];
             for (size_t j = 0; j < prev_layer.size(); ++j) {
-                net_i += weights[l][j][i] * prev_layer[j];
+                net_i += weights[l][i][j] * prev_layer[j];
             }
             net_i += biases[l][i];
             hidden_layers[l][i] = 1.0f / (1.0f + std::exp(-net_i)); // sigmoid activation
@@ -108,7 +108,7 @@ void NeuralMatrix::CalculateOutput(const std::vector<float>& input) noexcept {
     for (size_t i = 0; i < o_n_; ++i) {
         float net_i = 0;
         for (size_t j = 0; j < h_n_; ++j) {
-            net_i += weights[h_l_][j][i] * hidden_layers.back()[j];
+            net_i += weights[h_l_][i][j] * hidden_layers.back()[j];
         }
         net_i += biases.back()[i];
         output_layer[i] = 1.0f / (1.0f + std::exp(-net_i)); // sigmoid activation
@@ -144,7 +144,7 @@ void NeuralMatrix::PropagateErrorBack(const std::vector<float>& target) noexcept
         for (size_t j = 0; j < errors[l + 1].size(); ++j) {
             float error_next = errors[l + 1][j];
             for (size_t i = 0; i < h_n_; ++i) {
-                errors[l][i] += weights[l + 1][i][j] * error_next;
+                errors[l][i] += weights[l + 1][j][i] * error_next;
             }
         }
 
@@ -160,7 +160,7 @@ void NeuralMatrix::PropagateErrorBack(const std::vector<float>& target) noexcept
         for (size_t i = 0; i < errors[l].size(); ++i) {
             float error = errors[l][i];
             for (size_t j = 0; j < prev_layer.size(); ++j) {
-                weights[l][j][i] += eta_ * error * prev_layer[j];
+                weights[l][i][j] += eta_ * error * prev_layer[j];
             }
             biases[l][i] += eta_ * error;
         }

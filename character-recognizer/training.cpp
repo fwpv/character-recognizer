@@ -47,7 +47,7 @@ void RunExperiment1() {
             }
         }
 
-        for (size_t i = 0; i < 5000; ++i) {
+        for (size_t i = 0; i < 1000; ++i) {
             for (auto& it : dict) {
                 char c = it.first;
                 size_t number = c - '0';
@@ -55,11 +55,11 @@ void RunExperiment1() {
                     nm.CalculateOutput(vec);
                     set_unit(resources, number);
                     nm.PropagateErrorBack(resources);
+                    auto& ns_vec = not_chars[rand() % not_chars.size()];
+                    nm.CalculateOutput(ns_vec);
+                    clear(resources);
+                    nm.PropagateErrorBack(resources);
                 }
-                auto& ns_vec = not_chars[rand() % not_chars.size()];
-                nm.CalculateOutput(ns_vec);
-                clear(resources);
-                nm.PropagateErrorBack(resources);
             }
         }
     }
