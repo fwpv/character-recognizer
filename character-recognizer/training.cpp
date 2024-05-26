@@ -19,20 +19,21 @@ void RunExperiment1() {
     db.BuildFromFolder(path("numbers"s));
 
     // Init neural matrix
-    NeuralMatrix nm(4, 1024);
+    NeuralMatrix nm(1024, 2, 1024, 10);
     nm.InitializeWeightsWithRandom();
+    nm.InitializeBiasesWithRandom();
     nm.SetLearningCoefficient(0.01f);
 
     auto set_unit = [](std::vector<float>& vec, size_t pos) {
-        std::fill(vec.begin(), vec.begin() + 10, 0.0f);
+        std::fill(vec.begin(), vec.end(), 0.0f);
         vec[pos] = 1;
     };
 
     auto clear = [](std::vector<float>& vec) {
-        std::fill(vec.begin(), vec.begin() + 10, 0.0f);
+        std::fill(vec.begin(), vec.end(), 0.0f);
     };
 
-    std::vector<float> resources(1024, 0.0f);
+    std::vector<float> resources(10, 0.0f);
 
     // Training
     {
@@ -54,11 +55,11 @@ void RunExperiment1() {
                     nm.CalculateOutput(vec);
                     set_unit(resources, number);
                     nm.PropagateErrorBack(resources);
-                    auto& ns_vec = not_chars[rand() % not_chars.size()];
-                    nm.CalculateOutput(ns_vec);
-                    clear(resources);
-                    nm.PropagateErrorBack(resources);
                 }
+                auto& ns_vec = not_chars[rand() % not_chars.size()];
+                nm.CalculateOutput(ns_vec);
+                clear(resources);
+                nm.PropagateErrorBack(resources);
             }
         }
     }
@@ -73,7 +74,7 @@ void RunExperiment1() {
             const auto& vec = dict.at('0' + c)[k];
             nm.CalculateOutput(vec);
             const std::vector<float>& output = nm.ReadOutput();
-            auto it = std::max_element(output.begin(), output.begin() + 10);
+            auto it = std::max_element(output.begin(), output.end());
             size_t max = it - output.begin();
             std::cout << ' ' << max;
             precisions.push_back(*it);
@@ -93,7 +94,7 @@ void RunExperiment1() {
         auto vec = normalizer.Load(path("test_img"s) / (i_str + ".bmp"s));
         nm.CalculateOutput(vec);
         const std::vector<float>& output = nm.ReadOutput();
-        auto it = std::max_element(output.begin(), output.begin() + 10);
+        auto it = std::max_element(output.begin(), output.end());
         size_t max = it - output.begin();
         std::cout << c << ": " << max << "  p: " << *it << std::endl;
     }
