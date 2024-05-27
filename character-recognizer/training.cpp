@@ -19,7 +19,7 @@ void RunExperiment1() {
     db.BuildFromFolder(path("numbers"s));
 
     // Init neural matrix
-    SNN snn(1024, 2, 1024, 10);
+    Snn snn(1024, 2, 1024, 10);
     snn.InitializeWeightsWithRandom();
     snn.InitializeBiasesWithRandom();
     snn.SetLearningCoefficient(0.01f);
