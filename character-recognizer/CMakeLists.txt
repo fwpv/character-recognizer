@@ -12,7 +12,8 @@ set(RECOGNIZER_FILES
     snn.h snn.cpp
     training_database.h training_database.cpp
     training.h training.cpp
-    profiler.h)
+    profiler.h
+    state_saver.h state_saver.cpp)
 
 add_subdirectory(ImgLib ImgLibBuildDir)
 
