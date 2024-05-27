@@ -3,7 +3,51 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <stdexcept>
 #include <random>
+
+bool SNNMemento::IsValid() const {
+    if (i_n_ <= 0) return false;
+    if (h_l_ <= 0) return false;
+    if (h_n_ <= 0) return false;
+    if (o_n_ <= 0) return false;
+    if (input_layer.size() != i_n_) return false;
+    if (hidden_layers.size() != h_l_) return false;
+    for (const auto& layer : hidden_layers) {
+        if (layer.size() != h_n_) return false;
+    }
+    if (output_layer.size() != o_n_) return false;
+    if (weights.size() != h_l_ + 1) return false;
+    for (size_t l = 0; l < h_l_ + 1; ++l) {
+        if (l == 0) {
+            if (weights[l].size() != h_n_) return false;
+            for (const auto& edges : weights[l]) {
+                if (edges.size() != i_n_) return false;
+            }
+        } else if (l == h_l_) {
+            if (weights[l].size() != o_n_) return false;
+            for (const auto& edges : weights[l]) {
+                if (edges.size() != h_n_) return false;
+            }
+        } else {
+            if (weights[l].size() != h_n_) return false;
+            for (const auto& edges : weights[l]) {
+                if (edges.size() != h_n_) return false;
+            }
+        }
+    }
+    if (biases.size() != h_l_ + 1) return false;
+    for (size_t l = 0; l <= h_l_; ++l) {
+        size_t layer_size = (l == h_l_) ? o_n_ : h_n_;
+        if (biases[l].size() != layer_size) return false;
+    }
+    if (errors.size() != h_l_ + 1) return false;
+    for (size_t l = 0; l <= h_l_; ++l) {
+        size_t layer_size = (l == h_l_) ? o_n_ : h_n_;
+        if (errors[l].size() != layer_size) return false;
+    }
+    return true;
+}
 
 SNN::SNN(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
 : i_n_(i_n)
@@ -61,6 +105,46 @@ SNN::SNN(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
         size_t layer_size = (l == h_l) ? o_n : h_n;
         errors[l].resize(layer_size);
     }
+}
+
+SNN::SNN(const SNNMemento& memento) {
+    RestoreFromMemento(memento);
+}
+
+SNNMemento SNN::CreateMemento() const {
+    SNNMemento memento;
+    memento.input_layer = input_layer;
+    memento.hidden_layers = hidden_layers;
+    memento.output_layer = output_layer;
+    memento.weights = weights;
+    memento.biases = biases;
+    memento.errors = errors;
+    memento.i_n_ = i_n_;
+    memento.h_l_ = h_l_;
+    memento.h_n_ = h_n_;
+    memento.o_n_ = o_n_;
+    memento.eta_ = eta_;
+    return memento;
+}
+
+void SNN::RestoreFromMemento(const SNNMemento& memento) {
+    using namespace std::literals;
+    if (!memento.IsValid()) {
+        throw std::runtime_error("It is impossible to restore the internal state. "
+                                 "The data format is not correct"s);
+    }
+
+    input_layer = memento.input_layer;
+    hidden_layers = memento.hidden_layers;
+    output_layer = memento.output_layer;
+    weights = memento.weights;
+    biases = memento.biases;
+    errors = memento.errors;
+    i_n_ = memento.i_n_;
+    h_l_ = memento.h_l_;
+    h_n_ = memento.h_n_;
+    o_n_ = memento.o_n_;
+    eta_ = memento.eta_;
 }
 
 void SNN::InitializeWeightsWithRandom() {
