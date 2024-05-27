@@ -2,12 +2,13 @@
 
 #include <vector>
 
-class NeuralMatrix {
+// Simple neural network
+class SNN {
 public:
     /// NOTE: It doesn't work very well for h_l > 3,
     /// because it requires a very large number of training cycles
 
-    NeuralMatrix(size_t i_n, size_t h_l, size_t h_n, size_t o_n);
+    SNN(size_t i_n, size_t h_l, size_t h_n, size_t o_n);
     void InitializeWeightsWithRandom();
     void InitializeBiasesWithRandom(float min = 0.0f, float max = 0.1f);
 

@@ -1,4 +1,4 @@
-#include "neural_matrix.h"
+#include "snn.h"
 #include "profiler.h"
 #include "training.h"
 

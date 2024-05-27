@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(RECOGNIZER_FILES
     main.cpp
-    neural_matrix.h neural_matrix.cpp
+    snn.h snn.cpp
     training_database.h training_database.cpp
     training.h training.cpp
     profiler.h)

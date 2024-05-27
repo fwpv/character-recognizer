@@ -1,4 +1,4 @@
-#include "neural_matrix.h"
+#include "snn.h"
 #include "profiler.h"
 #include "training.h"
 #include "training_database.h"
@@ -19,10 +19,10 @@ void RunExperiment1() {
     db.BuildFromFolder(path("numbers"s));
 
     // Init neural matrix
-    NeuralMatrix nm(1024, 2, 1024, 10);
-    nm.InitializeWeightsWithRandom();
-    nm.InitializeBiasesWithRandom();
-    nm.SetLearningCoefficient(0.01f);
+    SNN snn(1024, 2, 1024, 10);
+    snn.InitializeWeightsWithRandom();
+    snn.InitializeBiasesWithRandom();
+    snn.SetLearningCoefficient(0.01f);
 
     auto set_unit = [](std::vector<float>& vec, size_t pos) {
         std::fill(vec.begin(), vec.end(), 0.0f);
@@ -52,13 +52,13 @@ void RunExperiment1() {
                 char c = it.first;
                 size_t number = c - '0';
                 for (auto& vec : it.second) {
-                    nm.CalculateOutput(vec);
+                    snn.CalculateOutput(vec);
                     set_unit(resources, number);
-                    nm.PropagateErrorBack(resources);
+                    snn.PropagateErrorBack(resources);
                     auto& ns_vec = not_chars[rand() % not_chars.size()];
-                    nm.CalculateOutput(ns_vec);
+                    snn.CalculateOutput(ns_vec);
                     clear(resources);
-                    nm.PropagateErrorBack(resources);
+                    snn.PropagateErrorBack(resources);
                 }
             }
         }
@@ -72,8 +72,8 @@ void RunExperiment1() {
         std::vector<float> precisions;
         for (int k = 0; k < 10; ++k) {
             const auto& vec = dict.at('0' + c)[k];
-            nm.CalculateOutput(vec);
-            const std::vector<float>& output = nm.ReadOutput();
+            snn.CalculateOutput(vec);
+            const std::vector<float>& output = snn.ReadOutput();
             auto it = std::max_element(output.begin(), output.end());
             size_t max = it - output.begin();
             std::cout << ' ' << max;
@@ -92,8 +92,8 @@ void RunExperiment1() {
     for (int c = 0; c < 10; ++c) {
         std::string i_str = std::to_string(c);
         auto vec = normalizer.Load(path("test_img"s) / (i_str + ".bmp"s));
-        nm.CalculateOutput(vec);
-        const std::vector<float>& output = nm.ReadOutput();
+        snn.CalculateOutput(vec);
+        const std::vector<float>& output = snn.ReadOutput();
         auto it = std::max_element(output.begin(), output.end());
         size_t max = it - output.begin();
         std::cout << c << ": " << max << "  p: " << *it << std::endl;

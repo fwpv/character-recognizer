@@ -1,11 +1,11 @@
-#include "neural_matrix.h"
+#include "snn.h"
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <random>
 
-NeuralMatrix::NeuralMatrix(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
+SNN::SNN(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
 : i_n_(i_n)
 , h_l_(h_l)
 , h_n_(h_n)
@@ -63,7 +63,7 @@ NeuralMatrix::NeuralMatrix(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
     }
 }
 
-void NeuralMatrix::InitializeWeightsWithRandom() {
+void SNN::InitializeWeightsWithRandom() {
     std::random_device rd;
     std::default_random_engine e2(rd());
     std::normal_distribution<float> dist(0, std::sqrt(2.0f / h_n_));
@@ -76,7 +76,7 @@ void NeuralMatrix::InitializeWeightsWithRandom() {
     }
 }
 
-void NeuralMatrix::InitializeBiasesWithRandom(float min, float max) {
+void SNN::InitializeBiasesWithRandom(float min, float max) {
     std::random_device rd;
     std::default_random_engine e2(rd());
     std::uniform_real_distribution<float> dist(min, max);
@@ -87,7 +87,7 @@ void NeuralMatrix::InitializeBiasesWithRandom(float min, float max) {
     }
 }
 
-void NeuralMatrix::CalculateOutput(const std::vector<float>& input) noexcept {
+void SNN::CalculateOutput(const std::vector<float>& input) noexcept {
     assert(input.size() == i_n_);
     input_layer = input;
 
@@ -115,7 +115,7 @@ void NeuralMatrix::CalculateOutput(const std::vector<float>& input) noexcept {
     }
 }
 
-float NeuralMatrix::EvaluateError(const std::vector<float>& target) const {
+float SNN::EvaluateError(const std::vector<float>& target) const {
     assert(target.size() == o_n_);
 
     float result = 0.0f;
@@ -127,7 +127,7 @@ float NeuralMatrix::EvaluateError(const std::vector<float>& target) const {
     return std::sqrt(result / o_n_);
 }
 
-void NeuralMatrix::PropagateErrorBack(const std::vector<float>& target) noexcept {
+void SNN::PropagateErrorBack(const std::vector<float>& target) noexcept {
     assert(target.size() == o_n_);
 
     // Calculate the error on the output layer
@@ -167,11 +167,11 @@ void NeuralMatrix::PropagateErrorBack(const std::vector<float>& target) noexcept
     }
 }
 
-const std::vector<float>& NeuralMatrix::ReadOutput() const {
+const std::vector<float>& SNN::ReadOutput() const {
     return output_layer;
 }
 
-void NeuralMatrix::SetLearningCoefficient(float eta) {
+void SNN::SetLearningCoefficient(float eta) {
     eta_ = eta;
 }
 
@@ -183,25 +183,25 @@ void Propagate() {
         vec[pos] = 1;
     };
 
-    NeuralMatrix nm(10, 1, 10, 10);
-    nm.InitializeWeightsWithRandom();
-    nm.InitializeBiasesWithRandom();
-    nm.SetLearningCoefficient(1.0f);
+    SNN snn(10, 1, 10, 10);
+    snn.InitializeWeightsWithRandom();
+    snn.InitializeBiasesWithRandom();
+    snn.SetLearningCoefficient(1.0f);
 
     // Propagate
     std::vector<float> resources(10);
     for (size_t t = 0; t < 3000; ++t) {
         set_unit(resources, t % 10);
-        nm.CalculateOutput(resources);
+        snn.CalculateOutput(resources);
         set_unit(resources, 9 - t % 10); // flip vector
-        nm.PropagateErrorBack(resources);
+        snn.PropagateErrorBack(resources);
     }
 
     // Check that the network has learned to flip vector
     for (size_t i = 0; i < 10; ++i) {
         set_unit(resources, i);
-        nm.CalculateOutput(resources);
-        const std::vector<float>& output = nm.ReadOutput();
+        snn.CalculateOutput(resources);
+        const std::vector<float>& output = snn.ReadOutput();
         auto it = std::max_element(output.begin(), output.end());
         size_t index = it - output.begin();
         assert(index == 9 - i);
