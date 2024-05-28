@@ -11,12 +11,15 @@ bool SnnMemento::IsValid() const {
     if (h_l <= 0) return false;
     if (h_n <= 0) return false;
     if (o_n <= 0) return false;
-    if (input_layer.size() != i_n) return false;
-    if (hidden_layers.size() != h_l) return false;
-    for (const auto& layer : hidden_layers) {
-        if (layer.size() != h_n) return false;
+    for (size_t l = 0; l < h_l + 2; ++l) {
+        if (l == 0) {
+            if (layers[l].size() != i_n) return false;
+        } else if (l == h_l + 1) {
+            if (layers[l].size() != o_n) return false;
+        } else {
+            if (layers[l].size() != h_n) return false;
+        }
     }
-    if (output_layer.size() != o_n) return false;
     if (weights.size() != h_l + 1) return false;
     for (size_t l = 0; l < h_l + 1; ++l) {
         if (l == 0) {
@@ -37,13 +40,10 @@ bool SnnMemento::IsValid() const {
         }
     }
     if (biases.size() != h_l + 1) return false;
-    for (size_t l = 0; l <= h_l; ++l) {
-        size_t layer_size = (l == h_l) ? o_n : h_n;
-        if (biases[l].size() != layer_size) return false;
-    }
     if (errors.size() != h_l + 1) return false;
     for (size_t l = 0; l <= h_l; ++l) {
         size_t layer_size = (l == h_l) ? o_n : h_n;
+        if (biases[l].size() != layer_size) return false;
         if (errors[l].size() != layer_size) return false;
     }
     return true;
@@ -59,17 +59,17 @@ Snn::Snn(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
     assert(h_n > 0);
     assert(o_n > 0);
 
-    // Initialize the input layer
-    input_layer_.resize(i_n);
-
-    // Initialize the hidden layers
-    hidden_layers_.resize(h_l);
-    for (auto& layer : hidden_layers_) {
-        layer.resize(h_n);
+    // Initialize the output layers
+    layers_.resize(h_l + 2);
+    for (size_t l = 0; l < h_l + 2; ++l) {
+        if (l == 0) {
+            layers_[l].resize(i_n);
+        } else if (l == h_l + 1) {
+            layers_[l].resize(o_n);
+        } else {
+            layers_[l].resize(h_n);
+        }
     }
-
-    // Initialize the output layer
-    output_layer_.resize(o_n);
 
     // Initialize the weights
     weights_.resize(h_l + 1);
@@ -92,17 +92,12 @@ Snn::Snn(size_t i_n, size_t h_l, size_t h_n, size_t o_n)
         }
     }
 
-    // Initialize biases
+    // Initialize biases and errors
     biases_.resize(h_l + 1);
-    for (size_t l = 0; l <= h_l; ++l) {
-        size_t layer_size = (l == h_l) ? o_n : h_n;
-        biases_[l].resize(layer_size);
-    }
-
-    // Initialize errors
     errors_.resize(h_l + 1);
     for (size_t l = 0; l <= h_l; ++l) {
         size_t layer_size = (l == h_l) ? o_n : h_n;
+        biases_[l].resize(layer_size);
         errors_[l].resize(layer_size);
     }
 }
@@ -113,9 +108,7 @@ Snn::Snn(const SnnMemento& memento) {
 
 SnnMemento Snn::CreateMemento() const {
     SnnMemento memento;
-    memento.input_layer = input_layer_;
-    memento.hidden_layers = hidden_layers_;
-    memento.output_layer = output_layer_;
+    memento.layers = layers_;
     memento.weights = weights_;
     memento.biases = biases_;
     memento.errors = errors_;
@@ -134,9 +127,7 @@ void Snn::RestoreFromMemento(const SnnMemento& memento) {
                                  "The data format is not correct"s);
     }
 
-    input_layer_ = memento.input_layer;
-    hidden_layers_ = memento.hidden_layers;
-    output_layer_ = memento.output_layer;
+    layers_ = memento.layers;
     weights_ = memento.weights;
     biases_ = memento.biases;
     errors_ = memento.errors;
@@ -173,29 +164,18 @@ void Snn::InitializeBiasesWithRandom(float min, float max) {
 
 void Snn::CalculateOutput(const std::vector<float>& input) noexcept {
     assert(input.size() == i_n_);
-    input_layer_ = input;
+    layers_.front() = input;
 
-    // Calculate hidden layers outputs
-    for (size_t l = 0; l < h_l_; ++l) {
-        for (size_t i = 0; i < h_n_; ++i) {
+    // Calculate layers outputs
+    for (size_t l = 0; l < h_l_ + 1; ++l) {
+        for (size_t i = 0; i < layers_[l + 1].size(); ++i) {
             float net_i = 0;
-            const auto& prev_layer = (l == 0) ? input_layer_ : hidden_layers_[l - 1];
-            for (size_t j = 0; j < prev_layer.size(); ++j) {
-                net_i += weights_[l][i][j] * prev_layer[j];
+            for (size_t j = 0; j < layers_[l].size(); ++j) {
+                net_i += weights_[l][i][j] * layers_[l][j];
             }
             net_i += biases_[l][i];
-            hidden_layers_[l][i] = 1.0f / (1.0f + std::exp(-net_i)); // sigmoid activation
+            layers_[l + 1][i] = 1.0f / (1.0f + std::exp(-net_i)); // sigmoid activation
         }
-    }
-
-    // Calculate output layer outputs
-    for (size_t i = 0; i < o_n_; ++i) {
-        float net_i = 0;
-        for (size_t j = 0; j < h_n_; ++j) {
-            net_i += weights_[h_l_][i][j] * hidden_layers_.back()[j];
-        }
-        net_i += biases_.back()[i];
-        output_layer_[i] = 1.0f / (1.0f + std::exp(-net_i)); // sigmoid activation
     }
 }
 
@@ -205,7 +185,7 @@ float Snn::EvaluateError(const std::vector<float>& target) const {
     float result = 0.0f;
     // Use RMSE (root mean squared error) to calculate
     for (size_t i = 0; i < o_n_; ++i) {
-        float delta = target[i] - output_layer_[i];
+        float delta = target[i] - layers_.back()[i];
         result += delta * delta;
     }
     return std::sqrt(result / o_n_);
@@ -216,7 +196,7 @@ void Snn::PropagateErrorBack(const std::vector<float>& target) noexcept {
 
     // Calculate the error on the output layer
     for (size_t i = 0; i < o_n_; ++i) {
-        float out = output_layer_[i];
+        float out = layers_.back()[i];
         float delta = target[i] - out;
         errors_.back()[i] = out * (1 - out) * delta;
     }
@@ -233,18 +213,17 @@ void Snn::PropagateErrorBack(const std::vector<float>& target) noexcept {
         }
 
         for (size_t i = 0; i < h_n_; ++i) {
-            float out = hidden_layers_[l][i];
+            float out = layers_[l + 1][i];
             errors_[l][i] *= out * (1 - out);
         }
     }
 
     // Update weights
     for (size_t l = 0; l < h_l_ + 1; ++l) {
-        const auto& prev_layer = (l == 0) ? input_layer_ : hidden_layers_[l - 1];
         for (size_t i = 0; i < errors_[l].size(); ++i) {
             float error = errors_[l][i];
-            for (size_t j = 0; j < prev_layer.size(); ++j) {
-                weights_[l][i][j] += eta_ * error * prev_layer[j];
+            for (size_t j = 0; j < layers_[l].size(); ++j) {
+                weights_[l][i][j] += eta_ * error * layers_[l][j];
             }
             biases_[l][i] += eta_ * error;
         }
@@ -252,7 +231,7 @@ void Snn::PropagateErrorBack(const std::vector<float>& target) noexcept {
 }
 
 const std::vector<float>& Snn::ReadOutput() const {
-    return output_layer_;
+    return layers_.back();
 }
 
 void Snn::SetLearningCoefficient(float eta) {

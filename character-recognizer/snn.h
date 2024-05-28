@@ -5,9 +5,7 @@
 class SnnMemento {
 public:
     bool IsValid() const;
-    std::vector<float> input_layer;
-    std::vector<std::vector<float>> hidden_layers;
-    std::vector<float> output_layer;
+    std::vector<std::vector<float>> layers;
     std::vector<std::vector<std::vector<float>>> weights;
     std::vector<std::vector<float>> biases;
     std::vector<std::vector<float>> errors;
@@ -41,9 +39,7 @@ public:
 
 private:
     // Layers
-    std::vector<float> input_layer_;
-    std::vector<std::vector<float>> hidden_layers_;
-    std::vector<float> output_layer_;
+    std::vector<std::vector<float>> layers_;
     
     // Weights between layers
     std::vector<std::vector<std::vector<float>>> weights_;

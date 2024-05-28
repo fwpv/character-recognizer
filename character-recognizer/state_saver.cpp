@@ -21,7 +21,7 @@ void LoadVector(std::ifstream& in, std::vector<T>& vec) {
     in.read(reinterpret_cast<char*>(vec.data()), size * sizeof(T));
 }
 
-constexpr uint32_t current_version = 0x24052716;
+constexpr uint32_t current_version = 0x24052823;
 
 void SaveSnnState(const std::filesystem::path& file, const SnnMemento& state) {
     std::ofstream out(file, std::ios::binary);
@@ -38,11 +38,9 @@ void SaveSnnState(const std::filesystem::path& file, const SnnMemento& state) {
     out.write(reinterpret_cast<const char*>(&state.o_n), sizeof(state.o_n));
     out.write(reinterpret_cast<const char*>(&state.eta), sizeof(state.eta));
 
-    SaveVector(out, state.input_layer);
-    for (const auto& layer : state.hidden_layers) {
+    for (const auto& layer : state.layers) {
         SaveVector(out, layer);
     }
-    SaveVector(out, state.output_layer);
 
     for (const auto& layer : state.weights) {
         for (const auto& edges : layer) {
@@ -80,12 +78,10 @@ SnnMemento LoadSnnState(const std::filesystem::path& file) {
     in.read(reinterpret_cast<char*>(&state.o_n), sizeof(state.o_n));
     in.read(reinterpret_cast<char*>(&state.eta), sizeof(state.eta));
 
-    LoadVector(in, state.input_layer);
-    state.hidden_layers.resize(state.h_l);
-    for (auto& layer : state.hidden_layers) {
+    state.layers.resize(state.h_l + 2);
+    for (auto& layer : state.layers) {
         LoadVector(in, layer);
     }
-    LoadVector(in, state.output_layer);
 
     state.weights.resize(state.h_l + 1);
     for (size_t l = 0; l < state.h_l + 1; ++l) {
