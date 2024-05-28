@@ -1,17 +1,12 @@
+#include "command_interpreter.h"
 #include "snn.h"
-#include "profiler.h"
-#include "training.h"
 
 void RunTests() {
-    {
-        LOG_DURATION("Propagate");
-        tests::Propagate();
-    }
+    tests::Propagate();
 }
 
-int main(/*int argc, char** argv*/) {
-    RunTests();
-    RunExperiment1();
-
+int main(int argc, char** argv) {
+    //RunTests();
+    ProcessInput(argc, argv);
     return 0;
 }

@@ -8,12 +8,14 @@ set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
 
 set(RECOGNIZER_FILES
+    command_interpreter.h command_interpreter.cpp
     main.cpp
+    profiler.h
     snn.h snn.cpp
+    state_saver.h state_saver.cpp
     training_database.h training_database.cpp
     training.h training.cpp
-    profiler.h
-    state_saver.h state_saver.cpp)
+    )
 
 add_subdirectory(ImgLib ImgLibBuildDir)
 
