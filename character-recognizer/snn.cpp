@@ -7,10 +7,11 @@
 #include <random>
 
 bool SnnMemento::IsValid() const {
-    if (i_n <= 0) return false;
-    if (h_l <= 0) return false;
-    if (h_n <= 0) return false;
-    if (o_n <= 0) return false;
+    if (i_n == 0) return false;
+    if (h_l == 0) return false;
+    if (h_n == 0) return false;
+    if (o_n == 0) return false;
+    if (layers.size() != h_l + 2) return false;
     for (size_t l = 0; l < h_l + 2; ++l) {
         if (l == 0) {
             if (layers[l].size() != i_n) return false;
