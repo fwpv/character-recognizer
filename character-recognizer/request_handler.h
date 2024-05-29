@@ -1,3 +1,5 @@
+#pragma once
+
 #include "snn.h"
 #include "training_database.h"
 

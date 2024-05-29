@@ -11,11 +11,10 @@ set(RECOGNIZER_FILES
     command_interpreter.h command_interpreter.cpp
     main.cpp
     profiler.h
+    request_handler.h request_handler.cpp
     snn.h snn.cpp
     state_saver.h state_saver.cpp
-    training_database.h training_database.cpp
-    training.h training.cpp
-    )
+    training_database.h training_database.cpp)
 
 add_subdirectory(ImgLib ImgLibBuildDir)
 
