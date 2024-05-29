@@ -6,8 +6,6 @@
 #include <iostream>
 #include <stdexcept>
 
-using namespace std::literals;
-
 namespace {
 
 std::pair<std::string_view, std::string_view>
@@ -84,10 +82,10 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
         for (int i = 1; i < strings.size(); ++i) {
             std::string_view str = strings[i];
             auto [name, value] = ParseParameter(str);
-            if (name == "target_path"sv) {
-                recognize_command.target_path = std::string(value);
-            } else if (name == "snn_data_path"sv) {
+            if (name == "snn_data_path"sv) { 
                 recognize_command.snn_data_path = std::string(value);
+            } else if (name == "target_path"sv) {
+                recognize_command.target_path = std::string(value);
             } else {
                 throw std::runtime_error("Parsing error: unsupported parameter '"s
                         + std::string(name) + "'"s);
@@ -104,7 +102,32 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
 }
 
 void InterpretCommand(Command command) {
-    
+    std::cout << "Interpret command. Test 1: Check parsing! "s << std::endl;;
+
+    if (std::holds_alternative<HelpCommand>(command)) {
+        HelpCommand help_command = std::get<HelpCommand>(command);
+        std::cout << "Command: help"s << std::endl;
+        
+    } else if (std::holds_alternative<TrainCommand>(command)) {
+        TrainCommand train_command = std::get<TrainCommand>(command);
+        std::cout << "Command: train"s << std::endl;
+        std::cout << "With parameters: "s << std::endl;
+        std::cout << "db_path: "s << train_command.db_path << std::endl;
+        std::cout << "path_to_save: "s << train_command.path_to_save << std::endl;
+        std::cout << "training_cycles: "s << train_command.training_cycles << std::endl;
+        std::cout << "algorithm: "s << train_command.algorithm << std::endl;
+
+    } else if (std::holds_alternative<RecognizeCommand>(command)) {
+        RecognizeCommand recogn_command = std::get<RecognizeCommand>(command);
+        std::cout << "Command: recognize"s << std::endl;
+        std::cout << "With parameters: "s << std::endl;
+        std::cout << "snn_data_path: "s << recogn_command.snn_data_path << std::endl;
+        std::cout << "target_path: "s << recogn_command.target_path << std::endl;
+        std::cout << "result_path: "s << recogn_command.result_path << std::endl;
+ 
+    } else {
+        std::cout << "Unrealized command"s << std::endl;
+    }
 }
 
 void ProcessInput(int argc, char** argv) {

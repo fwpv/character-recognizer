@@ -5,14 +5,30 @@
 #include <variant>
 #include <vector>
 
+using namespace std::literals;
+
 struct TrainCommand {
-    std::string db_path;
-    std::string path_to_save;
+    enum Algorithm {
+        SEQUENTIALLY,
+        SHUFFLED, // Not supported yet
+        SHUFFLED_WITH_NOT_SYM // Not supported yet
+    };
+    std::string snn_data_path = ""s; // Not supported yet
+    std::string db_path = "training_chars"s;
+    std::string path_to_save = "snn_data"s;
+    int training_cycles = 1000; // Not supported yet
+    Algorithm algorithm = SEQUENTIALLY; // Not supported yet
 };
 
 struct RecognizeCommand {
-    std::string target_path;
-    std::string snn_data_path;
+    enum OutputType {
+        TERMINAL,
+        FILE // Not supported yet
+    };
+    std::string snn_data_path = "snn_data"s;
+    std::string target_path = "target_chars";
+    std::string result_path = "result.txt"; // Not supported yet
+    OutputType output_type = TERMINAL; // Not supported yet
 };
 
 struct HelpCommand {
