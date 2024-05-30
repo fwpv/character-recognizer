@@ -1,4 +1,5 @@
 #include "command_interpreter.h"
+#include "request_handler.h"
 
 #include <cassert>
 #include <cstring>
@@ -102,11 +103,13 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
 }
 
 void InterpretCommand(Command command) {
-    std::cout << "Interpret command. Test 1: Check parsing! "s << std::endl;;
+    RequestHandler handler;
+    std::cout << "Interpret command. Test 2: Check parsing + handling! "s << std::endl;
 
     if (std::holds_alternative<HelpCommand>(command)) {
         HelpCommand help_command = std::get<HelpCommand>(command);
         std::cout << "Command: help"s << std::endl;
+        std::cout << "<A little text with help information>"s << std::endl;
         
     } else if (std::holds_alternative<TrainCommand>(command)) {
         TrainCommand train_command = std::get<TrainCommand>(command);
@@ -117,6 +120,16 @@ void InterpretCommand(Command command) {
         std::cout << "training_cycles: "s << train_command.training_cycles << std::endl;
         std::cout << "algorithm: "s << train_command.algorithm << std::endl;
 
+        if (train_command.snn_data_path.empty()) {
+            handler.CreateNewSnn();
+        } else {
+            handler.LoadSnn(train_command.snn_data_path);
+        }
+
+        handler.LoadDb(train_command.db_path);
+        handler.TrainSequentially(train_command.training_cycles, std::cout);
+        
+
     } else if (std::holds_alternative<RecognizeCommand>(command)) {
         RecognizeCommand recogn_command = std::get<RecognizeCommand>(command);
         std::cout << "Command: recognize"s << std::endl;
@@ -124,6 +137,10 @@ void InterpretCommand(Command command) {
         std::cout << "snn_data_path: "s << recogn_command.snn_data_path << std::endl;
         std::cout << "target_path: "s << recogn_command.target_path << std::endl;
         std::cout << "result_path: "s << recogn_command.result_path << std::endl;
+        
+        handler.LoadSnn(recogn_command.snn_data_path);
+        handler.Recognize(recogn_command.target_path, std::cout);
+        
  
     } else {
         std::cout << "Unrealized command"s << std::endl;
@@ -149,7 +166,7 @@ void ProcessInput(int argc, char** argv) {
 
     try {
         Command command = ParseStrings(strings);
-        InterpretCommand(command);
+        InterpretCommand(std::move(command));
     } catch (const std::exception& e) {
         std::cout << "An error occurred: "s + e.what() << std::endl;
     }

@@ -26,7 +26,7 @@ struct RecognizeCommand {
         FILE // Not supported yet
     };
     std::string snn_data_path = "snn_data"s;
-    std::string target_path = "target_chars";
+    std::string target_path = "target_chars"; // Only the picture is supported so far
     std::string result_path = "result.txt"; // Not supported yet
     OutputType output_type = TERMINAL; // Not supported yet
 };
