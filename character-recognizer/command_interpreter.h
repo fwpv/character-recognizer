@@ -1,9 +1,15 @@
 #pragma once
 
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <variant>
 #include <vector>
+
+class ParsingError : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
 
 using namespace std::literals;
 
@@ -26,8 +32,8 @@ struct RecognizeCommand {
         FILE // Not supported yet
     };
     std::string snn_data_path = "snn_data"s;
-    std::string target_path = "target_chars"; // Only the picture is supported so far
-    std::string result_path = "result.txt"; // Not supported yet
+    std::string target_path = "target_chars"s; // Only the picture is supported so far
+    std::string result_path = "result.txt"s; // Not supported yet
     OutputType output_type = TERMINAL; // Not supported yet
 };
 

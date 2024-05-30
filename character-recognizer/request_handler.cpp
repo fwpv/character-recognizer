@@ -86,6 +86,6 @@ void RequestHandler::Recognize(const path& target_path, std::ostream& output) {
     const std::vector<float>& snn_out = snn_->ReadOutput();
     auto it = std::max_element(snn_out.begin(), snn_out.end());
     size_t max = it - snn_out.begin();
-    output << "Result: " << max  << std::endl;
-    output << "Precision: " << *it << std::endl;
+    output << "Result: "s << max  << std::endl;
+    output << "Precision: "s << *it << std::endl;
 }

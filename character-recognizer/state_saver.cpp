@@ -60,13 +60,13 @@ void SaveSnnState(const std::filesystem::path& file, const SnnMemento& state) {
 SnnMemento LoadSnnState(const std::filesystem::path& file) {
     std::ifstream in(file, std::ios::binary);
     if (!in) {
-        throw std::runtime_error("Unable to open file " + file.string() + " for loading state");
+        throw std::runtime_error("Unable to open file "s + file.string() + " for loading state"s);
     }
 
     uint32_t version;
     in.read(reinterpret_cast<char*>(&version), sizeof(version));
     if (version != current_version) {
-        throw std::runtime_error("Version of file " + file.string() + " is not supported");
+        throw std::runtime_error("Version of file "s + file.string() + " is not supported"s);
     }
 
     //read snn memento

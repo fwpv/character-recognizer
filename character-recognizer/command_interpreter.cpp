@@ -5,7 +5,6 @@
 #include <cstring>
 #include <filesystem>
 #include <iostream>
-#include <stdexcept>
 
 namespace {
 
@@ -13,24 +12,24 @@ std::pair<std::string_view, std::string_view>
         ParseParameter(std::string_view parameter) {
     size_t equal_pos = parameter.find_first_of('=');
     if (equal_pos == std::string_view::npos) {
-        throw std::runtime_error("Parsing error: there is no '=' sign after parameter"s);
+        throw ParsingError("There is no '=' sign after parameter"s);
     }
     if (equal_pos == 0) {
-        throw std::runtime_error("Parsing error: empty string before '=' sign"s);
+        throw ParsingError("Empty string before '=' sign"s);
     }
     if (equal_pos == parameter.size() - 1) {
-        throw std::runtime_error("Parsing error: empty string after '=' sign"s);
+        throw ParsingError("Empty string after '=' sign"s);
     }
 
     std::string_view name = parameter.substr(0, equal_pos);
 
     // Remove minus
     if (name[0] != '-') {
-        throw std::runtime_error("Parsing error: Parameter must start with '-'"s);
+        throw ParsingError("Parameter must start with '-'"s);
     }
     name.remove_prefix(1);
     if (name.empty()) {
-        throw std::runtime_error("Parsing error: An empty parameter"s);
+        throw ParsingError("An empty parameter"s);
     }
 
     std::string_view value =
@@ -44,7 +43,7 @@ std::pair<std::string_view, std::string_view>
         value.remove_suffix(1);
     }
     if (value.empty()) {
-        throw std::runtime_error("Parsing error: empty string after '=' sign"s);
+        throw ParsingError("Empty string after '=' sign"s);
     }
 
     return {name, value};
@@ -67,12 +66,25 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
         for (int i = 1; i < strings.size(); ++i) {
             std::string_view str = strings[i];
             auto [name, value] = ParseParameter(str);
-            if (name == "db_path"sv) {
+            if (name == "snn_data_path"sv) {
+                train_command.snn_data_path = std::string(value);
+            } else if (name == "db_path"sv) {
                 train_command.db_path = std::string(value);
             } else if (name == "path_to_save"sv) {
                 train_command.path_to_save = std::string(value);
+            } else if (name == "cycles"sv) {
+                int cycles;
+                try {
+                    cycles = std::stoi(std::string(value));
+                } catch (...) {
+                    throw std::invalid_argument(std::string(value) + " is not an integer value"s);
+                }
+                if (cycles < 1) {
+                    throw std::invalid_argument("Number of cycles must be greater than 0"s);
+                }
+                train_command.training_cycles = cycles;
             } else {
-                throw std::runtime_error("Parsing error: unsupported parameter '"s
+                throw ParsingError("Unsupported parameter '"s
                         + std::string(name) + "'"s);
             }
         }
@@ -88,14 +100,14 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
             } else if (name == "target_path"sv) {
                 recognize_command.target_path = std::string(value);
             } else {
-                throw std::runtime_error("Parsing error: unsupported parameter '"s
+                throw ParsingError("Unsupported parameter '"s
                         + std::string(name) + "'"s);
             }
         }
         command = recognize_command;
 
     } else {
-        throw std::runtime_error("Parsing error: unsupported command '"s
+        throw ParsingError("Unsupported command '"s
                 + std::string(name) + "'"s);
     }
 
@@ -104,7 +116,7 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
 
 void InterpretCommand(Command command) {
     RequestHandler handler;
-    std::cout << "Interpret command. Test 2: Check parsing + handling! "s << std::endl;
+    std::cout << "Interpret command. Test 2: Check parsing + handling!"s << std::endl;
 
     if (std::holds_alternative<HelpCommand>(command)) {
         HelpCommand help_command = std::get<HelpCommand>(command);
@@ -128,6 +140,7 @@ void InterpretCommand(Command command) {
 
         handler.LoadDb(train_command.db_path);
         handler.TrainSequentially(train_command.training_cycles, std::cout);
+        handler.SaveSnn(train_command.path_to_save);
         
 
     } else if (std::holds_alternative<RecognizeCommand>(command)) {
@@ -167,7 +180,9 @@ void ProcessInput(int argc, char** argv) {
     try {
         Command command = ParseStrings(strings);
         InterpretCommand(std::move(command));
+    } catch (const ParsingError& e) {
+        std::cout << "A parsing error has occurred: "s + e.what() << std::endl;
     } catch (const std::exception& e) {
-        std::cout << "An error occurred: "s + e.what() << std::endl;
+        std::cout << "An error has occurred: "s + e.what() << std::endl;
     }
 }
