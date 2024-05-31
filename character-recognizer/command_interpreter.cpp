@@ -138,7 +138,6 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
 
 void InterpretCommand(Command command) {
     RequestHandler handler;
-    std::cout << "Interpret command. Test 2: Check parsing + handling!"s << std::endl;
 
     if (std::holds_alternative<HelpCommand>(command)) {
         HelpCommand help_command = std::get<HelpCommand>(command);
@@ -147,13 +146,6 @@ void InterpretCommand(Command command) {
         
     } else if (std::holds_alternative<TrainCommand>(command)) {
         TrainCommand train_command = std::get<TrainCommand>(command);
-        std::cout << "Command: train"s << std::endl;
-        std::cout << "With parameters: "s << std::endl;
-        std::cout << "db_path: "s << train_command.db_path << std::endl;
-        std::cout << "path_to_save: "s << train_command.path_to_save << std::endl;
-        std::cout << "training_cycles: "s << train_command.training_cycles << std::endl;
-        std::cout << "algorithm: "s << train_command.algorithm << std::endl;
-
         if (train_command.snn_data_path.empty()) {
             handler.CreateNewSnn();
         } else {
@@ -163,16 +155,9 @@ void InterpretCommand(Command command) {
         handler.LoadDb(train_command.db_path);
         handler.TrainSequentially(train_command.training_cycles, std::cout);
         handler.SaveSnn(train_command.path_to_save);
-        
 
     } else if (std::holds_alternative<RecognizeCommand>(command)) {
         RecognizeCommand recogn_command = std::get<RecognizeCommand>(command);
-        std::cout << "Command: recognize"s << std::endl;
-        std::cout << "With parameters: "s << std::endl;
-        std::cout << "snn_data_path: "s << recogn_command.snn_data_path << std::endl;
-        std::cout << "target_path: "s << recogn_command.target_path << std::endl;
-        std::cout << "result_path: "s << recogn_command.result_path << std::endl;
-        
         handler.LoadSnn(recogn_command.snn_data_path);
 
         std::ostream *os;
