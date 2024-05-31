@@ -17,24 +17,21 @@ struct TrainCommand {
     enum Algorithm {
         SEQUENTIALLY,
         SHUFFLED, // Not supported yet
-        SHUFFLED_WITH_NOT_SYM // Not supported yet
+        SHUFFLED_WITH_NOT_SYM, // Not supported yet
+        FIRST_ALG = SEQUENTIALLY,
+        LAST_ALG = SHUFFLED_WITH_NOT_SYM
     };
-    std::string snn_data_path = ""s; // Not supported yet
+    std::string snn_data_path = ""s;
     std::string db_path = "training_chars"s;
     std::string path_to_save = "snn_data"s;
-    int training_cycles = 1000; // Not supported yet
-    Algorithm algorithm = SEQUENTIALLY; // Not supported yet
+    int training_cycles = 1000;
+    Algorithm algorithm = SEQUENTIALLY;
 };
 
 struct RecognizeCommand {
-    enum OutputType {
-        TERMINAL,
-        FILE // Not supported yet
-    };
     std::string snn_data_path = "snn_data"s;
     std::string target_path = "target_chars"s; // Only the picture is supported so far
-    std::string result_path = "result.txt"s; // Not supported yet
-    OutputType output_type = TERMINAL; // Not supported yet
+    std::string result_path = ""s;
 };
 
 struct HelpCommand {

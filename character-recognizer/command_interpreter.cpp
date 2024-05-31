@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 
 namespace {
@@ -49,6 +50,14 @@ std::pair<std::string_view, std::string_view>
     return {name, value};
 }
 
+int StringViewToInt(std::string_view value) {
+    try {
+        return std::stoi(std::string(value));
+    } catch (...) {
+        throw std::invalid_argument(std::string(value) + " is not an integer value"s);
+    }
+}
+
 }
 
 Command ParseStrings(const std::vector<std::string_view>& strings) {
@@ -66,23 +75,30 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
         for (int i = 1; i < strings.size(); ++i) {
             std::string_view str = strings[i];
             auto [name, value] = ParseParameter(str);
+
             if (name == "snn_data_path"sv) {
                 train_command.snn_data_path = std::string(value);
+
             } else if (name == "db_path"sv) {
                 train_command.db_path = std::string(value);
+
             } else if (name == "path_to_save"sv) {
                 train_command.path_to_save = std::string(value);
+
             } else if (name == "cycles"sv) {
-                int cycles;
-                try {
-                    cycles = std::stoi(std::string(value));
-                } catch (...) {
-                    throw std::invalid_argument(std::string(value) + " is not an integer value"s);
-                }
+                int cycles = StringViewToInt(value);
                 if (cycles < 1) {
                     throw std::invalid_argument("Number of cycles must be greater than 0"s);
                 }
                 train_command.training_cycles = cycles;
+
+            } else if (name == "algorithm"sv) {
+                int algorithm = StringViewToInt(value);
+                if (algorithm != TrainCommand::SEQUENTIALLY) {
+                    throw std::invalid_argument("Only algorithm number 0 (sequential) is supported"s);
+                }
+                train_command.algorithm = static_cast<TrainCommand::Algorithm>(algorithm);
+
             } else {
                 throw ParsingError("Unsupported parameter '"s
                         + std::string(name) + "'"s);
@@ -95,10 +111,16 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
         for (int i = 1; i < strings.size(); ++i) {
             std::string_view str = strings[i];
             auto [name, value] = ParseParameter(str);
+
             if (name == "snn_data_path"sv) { 
                 recognize_command.snn_data_path = std::string(value);
+
             } else if (name == "target_path"sv) {
                 recognize_command.target_path = std::string(value);
+
+            } else if (name == "result_path"sv) {
+                recognize_command.result_path = std::string(value);
+
             } else {
                 throw ParsingError("Unsupported parameter '"s
                         + std::string(name) + "'"s);
@@ -152,7 +174,20 @@ void InterpretCommand(Command command) {
         std::cout << "result_path: "s << recogn_command.result_path << std::endl;
         
         handler.LoadSnn(recogn_command.snn_data_path);
-        handler.Recognize(recogn_command.target_path, std::cout);
+
+        std::ostream *os;
+        std::ofstream result_file; 
+        if (recogn_command.result_path.empty()) {
+            os = &std::cout;
+        } else {
+            result_file.open(recogn_command.result_path);
+            if (!result_file) {
+                throw std::runtime_error("Unable to open file "s
+                    + recogn_command.result_path + " for saving result"s);
+            }
+            os = &result_file;
+        }
+        handler.Recognize(recogn_command.target_path, *os);
         
  
     } else {
