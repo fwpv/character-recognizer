@@ -17,6 +17,9 @@ using namespace std::literals;
 
 void RequestHandler::CreateNewSnn() {
     snn_ = std::make_unique<Snn>(1024, 2, 1024, 10);
+    snn_->InitializeBiasesWithRandom();
+    snn_->InitializeWeightsWithRandom();
+    snn_->SetLearningCoefficient(0.1f);
 }
 
 void RequestHandler::LoadSnn(const path& snn_data_path) {
