@@ -36,7 +36,12 @@ Creates a new neural network and trains it with images from the folder.
 - `-db_path="..."` - Path to the folder with images. Default value is `"training_chars"`.
 - `-path_to_save="..."` - Path to save the trained neural network data. Default value is `"snn_data"`.
 - `-cycles=...` - Number of training cycles. Default value is `1000`.
-- `algorithm=...` - Training algorithm. Default value is `0`. Currently, only one mode is available - sequential.
+- `-algorithm=...` - Training algorithm. Default value is `0`. Currently, only one mode is available - sequential.
+
+**Example:**
+```sh
+recognizer.exe train -db_path="training_chars" -path_to_save="snn_data_2000_sequent" -cycles=2000
+```
 
 ### 2. `recognize`
 Loads the neural network data and recognizes an image or a folder with images.
@@ -45,6 +50,11 @@ Loads the neural network data and recognizes an image or a folder with images.
 - `-snn_data_path="..."` - Path to the pre-trained neural network. Default value is `"snn_data"`.
 - `-target_path="..."` - Path to the image file or folder with images for recognition. Default value is `"target_chars"`.
 - `-result_path="..."` - Path to save the report as a text file. If not specified, the report will be displayed in the terminal. Default value is an empty string.
+
+**Example:**
+```sh
+recognizer.exe recognize -snn_data_path="snn_data_2000_sequent" -target_path="target_chars" -result_path="result.txt"
+```
 
 ### 3. `help`
 Displays help information about commands and their parameters.
