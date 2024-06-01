@@ -1,6 +1,6 @@
-# Recognizer
+# Character Recognizer
 
-**Recognizer** is an experimental program that explores the capabilities of a simple neural network for character recognition. Currently, it only supports digits from 0 to 9.
+**Character Recognizer** is an experimental program that explores the capabilities of a simple neural network for character recognition. Currently, it only supports digits from 0 to 9.
 
 ## How to Build
 

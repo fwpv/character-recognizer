@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <stdexcept>
 #include <random>
+#include <stdexcept>
 
 bool SnnMemento::IsValid() const {
     if (i_n == 0) return false;

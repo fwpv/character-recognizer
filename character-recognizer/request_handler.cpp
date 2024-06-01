@@ -1,6 +1,6 @@
-#include "snn.h"
-#include "profiler.h"
 #include "request_handler.h"
+#include "profiler.h"
+#include "snn.h"
 #include "state_saver.h"
 #include "training_database.h"
 
@@ -129,12 +129,10 @@ void RequestHandler::RecognizeImage(const path& target_path, std::ostream& outpu
     }
     output << "Snn output: "s;
     output << std::fixed << std::showpoint << std::setprecision(3);
-    bool first = true;
     for (int i = 0; i < 10; ++i) {
-        if (!first) {
+        if (i > 0) {
             output << ", "s;
         }
-        first = false;
         output << snn_out[i];
     }
     output << std::endl;

@@ -5,8 +5,6 @@
 
 using namespace std::literals;
 
-//--------------------ImageFileNormalizer-----------------------
-
 ImageFileNormalizer::ImageFileNormalizer(size_t input_width)
 : input_width_(input_width) {
 }
@@ -45,8 +43,6 @@ std::vector<float> ImageFileNormalizer::Load(const std::filesystem::path& file) 
 
     return vec;
 }
-
-//----------------------TrainingDatabase------------------------
 
 TrainingDatabase::TrainingDatabase(const FileNormalizerInterface* file_normalizer)
 : file_normalizer_(file_normalizer) {

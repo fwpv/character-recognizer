@@ -1,8 +1,8 @@
 #include "state_saver.h"
 
 #include <fstream>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 using namespace std::literals;
 
