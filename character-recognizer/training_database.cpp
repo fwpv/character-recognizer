@@ -17,7 +17,7 @@ std::vector<float> ImageFileNormalizer::Load(const std::filesystem::path& file) 
     const int h = image.GetHeight();
 
     if (w == 0) {
-        throw std::runtime_error("The file "s + file.filename().string() + " cannot be read"s);
+        throw std::runtime_error("The file "s + file.string() + " cannot be read"s);
     }
     if (w != h) {
         throw std::runtime_error("The sides of the image must be the same"s);

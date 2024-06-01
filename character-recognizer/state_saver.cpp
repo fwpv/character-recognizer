@@ -31,7 +31,7 @@ void SaveSnnState(const std::filesystem::path& file, const SnnMemento& state) {
 
     out.write(reinterpret_cast<const char*>(&current_version), sizeof(current_version));
 
-    //write snn memento
+    // Write snn memento
     out.write(reinterpret_cast<const char*>(&state.i_n), sizeof(state.i_n));
     out.write(reinterpret_cast<const char*>(&state.h_l), sizeof(state.h_l));
     out.write(reinterpret_cast<const char*>(&state.h_n), sizeof(state.h_n));
@@ -69,7 +69,7 @@ SnnMemento LoadSnnState(const std::filesystem::path& file) {
         throw std::runtime_error("Version of file "s + file.string() + " is not supported"s);
     }
 
-    //read snn memento
+    // Read snn memento
     SnnMemento state;
 
     in.read(reinterpret_cast<char*>(&state.i_n), sizeof(state.i_n));
