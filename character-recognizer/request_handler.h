@@ -23,5 +23,6 @@ private:
     std::unique_ptr<TrainingDatabase> db_;
     std::unique_ptr<Snn> snn_;
 
-    void RecognizeImage(const std::filesystem::path& target_path, std::ostream& output);
+    void RecognizeFolder(const std::filesystem::path& target_path, std::ostream& output, int* n);
+    void RecognizeImage(const std::filesystem::path& target_path, std::ostream& output, const int* n);
 };

@@ -91,29 +91,51 @@ void RequestHandler::Recognize(const path& target_path, std::ostream& output) {
         if (is_empty(target_path)) {
             throw std::runtime_error(target_path.string() + " is empty"s);
         }
-        throw std::runtime_error("Folder content recognition is not supported yet"s);
+        int n = 1;
+        RecognizeFolder(target_path, output, &n);
     } else if (is_regular_file(target_path)) {
-        RecognizeImage(target_path, output);
+        RecognizeImage(target_path, output, nullptr);
     }
 }
 
-void RequestHandler::RecognizeImage(const path& target_path, std::ostream& output) {
-    std::cout << "File: " << target_path.string() << std::endl;
+void RequestHandler::RecognizeFolder(const path& target_path, std::ostream& output, int* n) {
+    output << std::endl << "Folder: "s << target_path << std::endl;
+    for (const auto& sub : directory_iterator(target_path)) {  
+        if (sub.is_directory()) {
+            RecognizeFolder(sub.path(), output, n); // Call recursively
+        } else if (sub.is_regular_file()) {
+            RecognizeImage(sub.path(), output, n);
+            (*n) += 1;
+        }
+    }
+}
+
+void RequestHandler::RecognizeImage(const path& target_path, std::ostream& output, const int* n) {
+    if (n) {
+        output << std::endl << *n << ". "s;
+    }
+    output << target_path.string() << std::endl;
+
     auto vec = normalizer_->Load(target_path);
     snn_->CalculateOutput(vec);
     const std::vector<float>& snn_out = snn_->ReadOutput();
     auto it = std::max_element(snn_out.begin(), snn_out.end());
     size_t max = it - snn_out.begin();
-    output << "Recognized: "s << max << std::endl;
-    output << "Precision: "s;
-    std::cout << std::fixed << std::showpoint << std::setprecision(3);
+    // Only if the input value is greater than 0.5, the character is considered recognized
+    if (*it > 0.50f) { 
+        output << "Recognized: "s << max << std::endl;
+    } else {
+        output << "Closer to: "s << max << std::endl;
+    }
+    output << "Snn output: "s;
+    output << std::fixed << std::showpoint << std::setprecision(3);
     bool first = true;
     for (int i = 0; i < 10; ++i) {
         if (!first) {
             output << ", "s;
         }
         first = false;
-        output << static_cast<char>('0' + i) << ": "s << snn_out[i];
+        output << snn_out[i];
     }
     output << std::endl;
 }

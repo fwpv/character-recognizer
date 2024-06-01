@@ -30,7 +30,7 @@ struct TrainCommand {
 
 struct RecognizeCommand {
     std::string snn_data_path = "snn_data"s;
-    std::string target_path = "target_chars"s; // Only the picture is supported so far
+    std::string target_path = "target_chars"s;
     std::string result_path = ""s;
 };
 
