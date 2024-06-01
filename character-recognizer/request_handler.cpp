@@ -83,12 +83,37 @@ void RequestHandler::TrainSequentially(int cycles, std::ostream& progress_output
 void RequestHandler::Recognize(const path& target_path, std::ostream& output) {
     assert(snn_);
 
+    if (!exists(target_path)) {
+        throw std::runtime_error(target_path.string() + " does not exist"s);
+    }
     normalizer_ = std::make_unique<ImageFileNormalizer>(1024);
+    if (is_directory(target_path)) {
+        if (is_empty(target_path)) {
+            throw std::runtime_error(target_path.string() + " is empty"s);
+        }
+        throw std::runtime_error("Folder content recognition is not supported yet"s);
+    } else if (is_regular_file(target_path)) {
+        RecognizeImage(target_path, output);
+    }
+}
+
+void RequestHandler::RecognizeImage(const path& target_path, std::ostream& output) {
+    std::cout << "File: " << target_path.string() << std::endl;
     auto vec = normalizer_->Load(target_path);
     snn_->CalculateOutput(vec);
     const std::vector<float>& snn_out = snn_->ReadOutput();
     auto it = std::max_element(snn_out.begin(), snn_out.end());
     size_t max = it - snn_out.begin();
-    output << "Result: "s << max  << std::endl;
-    output << "Precision: "s << *it << std::endl;
+    output << "Recognized: "s << max << std::endl;
+    output << "Precision: "s;
+    std::cout << std::fixed << std::showpoint << std::setprecision(3);
+    bool first = true;
+    for (int i = 0; i < 10; ++i) {
+        if (!first) {
+            output << ", "s;
+        }
+        first = false;
+        output << static_cast<char>('0' + i) << ": "s << snn_out[i];
+    }
+    output << std::endl;
 }
