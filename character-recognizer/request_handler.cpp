@@ -12,7 +12,6 @@
 #include <random>
 #include <vector>
 
-using namespace std::filesystem;
 using namespace std::literals;
 
 void RequestHandler::CreateNewSnn() {
@@ -22,18 +21,18 @@ void RequestHandler::CreateNewSnn() {
     snn_->SetLearningCoefficient(0.1f);
 }
 
-void RequestHandler::LoadSnn(const path& snn_data_path) {
+void RequestHandler::LoadSnn(const std::filesystem::path& snn_data_path) {
     SnnMemento snn_state = LoadSnnState(snn_data_path);
     snn_ = std::make_unique<Snn>(snn_state);
 }
 
-void RequestHandler::SaveSnn(const path& path_to_save) const {
+void RequestHandler::SaveSnn(const std::filesystem::path& path_to_save) const {
     assert(snn_);
     SnnMemento snn_state = snn_->CreateMemento();
     SaveSnnState(path_to_save, snn_state);
 }
 
-void RequestHandler::LoadDb(const path& db_path) {
+void RequestHandler::LoadDb(const std::filesystem::path& db_path) {
     normalizer_ = std::make_unique<ImageFileNormalizer>(1024);
     db_ = std::make_unique<TrainingDatabase>(normalizer_.get());
     db_->BuildFromFolder(db_path);
@@ -105,7 +104,7 @@ void RequestHandler::Recognize(const std::filesystem::path& target_path, std::os
 
 void RequestHandler::RecognizeFolder(const std::filesystem::path& target_path, std::ostream& output) {
     output << std::endl << "Folder: "s << target_path << std::endl;
-    for (const auto& sub : directory_iterator(target_path)) {  
+    for (const auto& sub : std::filesystem::directory_iterator(target_path)) {  
         if (sub.is_directory()) {
             RecognizeFolder(sub.path(), output); // Call recursively
         } else if (sub.is_regular_file()) {
