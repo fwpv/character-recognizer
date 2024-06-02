@@ -1,5 +1,7 @@
 #pragma once
 
+#include "request_handler.h"
+
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -14,18 +16,11 @@ public:
 using namespace std::literals;
 
 struct TrainCommand {
-    enum Algorithm {
-        SEQUENTIALLY,
-        SHUFFLED, // Not supported yet
-        SHUFFLED_WITH_NOT_SYM, // Not supported yet
-        FIRST_ALG = SEQUENTIALLY,
-        LAST_ALG = SHUFFLED_WITH_NOT_SYM
-    };
     std::string snn_data_path = ""s;
     std::string db_path = "training_chars"s;
     std::string path_to_save = "snn_data"s;
     int training_cycles = 1000;
-    Algorithm algorithm = SEQUENTIALLY;
+    RequestHandler::Algorithm algorithm = RequestHandler::SHUFFLED;
 };
 
 struct RecognizeCommand {

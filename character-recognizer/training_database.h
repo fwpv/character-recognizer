@@ -24,18 +24,22 @@ private:
 
 class TrainingDatabase {
 public:
-    using Data = std::vector<std::vector<float>>;
-    using DataDict = std::unordered_map<char, Data>;
+    using Char = std::vector<float>;
+    using Chars = std::vector<Char>;
+    using CharsDict = std::unordered_map<char, Chars>;
+    using CharPtrArray = std::vector<std::pair<char, const Char*>>;
 
     TrainingDatabase(const FileNormalizerInterface* file_normalizer);
     void BuildFromFolder(const std::filesystem::path& folder);
 
-    const DataDict& GetDataDictionary() const;
-    const Data& GetNonCharData() const;
-    std::vector<char> GetUploadedChars() const;
+    const CharsDict& GetCharsDictionary() const;
+    const Chars& GetNonChars() const;
+    CharPtrArray CreateCharPtrArray() const;
+
+    static void ShuffleCharPtrArray(CharPtrArray& array);
 
 private:
     const FileNormalizerInterface* file_normalizer_;
-    DataDict data_dict_;
-    Data non_char_data_;
+    CharsDict data_dict_;
+    Chars non_chars_;
 };

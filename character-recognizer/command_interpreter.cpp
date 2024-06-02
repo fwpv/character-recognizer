@@ -1,5 +1,4 @@
 #include "command_interpreter.h"
-#include "request_handler.h"
 
 #include <cassert>
 #include <cstring>
@@ -94,10 +93,12 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
 
             } else if (name == "algorithm"sv) {
                 int algorithm = StringViewToInt(value);
-                if (algorithm != TrainCommand::SEQUENTIALLY) {
-                    throw std::invalid_argument("Only algorithm number 0 (sequential) is supported"s);
+                if (algorithm != RequestHandler::SEQUENTIALLY
+                    && algorithm != RequestHandler::SHUFFLED) {
+                    throw std::invalid_argument("Only algorithms 0 (sequential) "
+                        "and 1 (shuffled) are supported"s);
                 }
-                train_command.algorithm = static_cast<TrainCommand::Algorithm>(algorithm);
+                train_command.algorithm = static_cast<RequestHandler::Algorithm>(algorithm);
 
             } else {
                 throw ParsingError("Unsupported parameter '"s
@@ -153,7 +154,8 @@ void InterpretCommand(Command command) {
         }
 
         handler.LoadDb(train_command.db_path);
-        handler.TrainSequentially(train_command.training_cycles, std::cout);
+        handler.SetAlgorithm(train_command.algorithm);
+        handler.Train(train_command.training_cycles, std::cout);
         handler.SaveSnn(train_command.path_to_save);
 
     } else if (std::holds_alternative<RecognizeCommand>(command)) {

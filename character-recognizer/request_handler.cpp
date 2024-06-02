@@ -38,7 +38,7 @@ void RequestHandler::LoadDb(const path& db_path) {
     db_ = std::make_unique<TrainingDatabase>(normalizer_.get());
     db_->BuildFromFolder(db_path);
 
-    const TrainingDatabase::DataDict& dict = db_->GetDataDictionary();
+    const TrainingDatabase::CharsDict& dict = db_->GetCharsDictionary();
     for (auto& it : dict) {
         char c = it.first;
         if (c < '0' || c > '9') {
@@ -47,7 +47,11 @@ void RequestHandler::LoadDb(const path& db_path) {
     }
 }
 
-void RequestHandler::TrainSequentially(int cycles, std::ostream& progress_output) {
+void RequestHandler::SetAlgorithm(Algorithm algorithm) {
+    algorithm_ = algorithm;
+}
+
+void RequestHandler::Train(int cycles, std::ostream& progress_output) {
     assert(db_);
     assert(snn_);
 
@@ -62,17 +66,17 @@ void RequestHandler::TrainSequentially(int cycles, std::ostream& progress_output
 
     std::vector<float> resources(10, 0.0f);
 
-    const TrainingDatabase::DataDict& dict = db_->GetDataDictionary();
+    TrainingDatabase::CharPtrArray char_ptr_array = db_->CreateCharPtrArray();
     progress_output << 0;
     for (int i = 0; i < cycles; ++i) {
-        for (auto& it : dict) {
-            char c = it.first;
+        if (algorithm_ == SHUFFLED) {
+            TrainingDatabase::ShuffleCharPtrArray(char_ptr_array);
+        }
+        for (auto [c, vec_ptr] : char_ptr_array) {
             size_t number = c - '0';
-            for (auto& vec : it.second) {
-                snn_->CalculateOutput(vec);
-                set_unit(resources, number);
-                snn_->PropagateErrorBack(resources);
-            }
+            snn_->CalculateOutput(*vec_ptr);
+            set_unit(resources, number);
+            snn_->PropagateErrorBack(resources);
         }
         progress_output << '\r';
         progress_output << i + 1;
@@ -80,7 +84,7 @@ void RequestHandler::TrainSequentially(int cycles, std::ostream& progress_output
     progress_output << std::endl;
 }
 
-void RequestHandler::Recognize(const path& target_path, std::ostream& output) {
+void RequestHandler::Recognize(const std::filesystem::path& target_path, std::ostream& output) {
     assert(snn_);
 
     if (!exists(target_path)) {
@@ -91,28 +95,29 @@ void RequestHandler::Recognize(const path& target_path, std::ostream& output) {
         if (is_empty(target_path)) {
             throw std::runtime_error(target_path.string() + " is empty"s);
         }
-        int n = 1;
-        RecognizeFolder(target_path, output, &n);
+        file_counter_ = 1;
+        RecognizeFolder(target_path, output);
     } else if (is_regular_file(target_path)) {
-        RecognizeImage(target_path, output, nullptr);
+        file_counter_ = -1;
+        RecognizeImage(target_path, output);
     }
 }
 
-void RequestHandler::RecognizeFolder(const path& target_path, std::ostream& output, int* n) {
+void RequestHandler::RecognizeFolder(const std::filesystem::path& target_path, std::ostream& output) {
     output << std::endl << "Folder: "s << target_path << std::endl;
     for (const auto& sub : directory_iterator(target_path)) {  
         if (sub.is_directory()) {
-            RecognizeFolder(sub.path(), output, n); // Call recursively
+            RecognizeFolder(sub.path(), output); // Call recursively
         } else if (sub.is_regular_file()) {
-            RecognizeImage(sub.path(), output, n);
-            (*n) += 1;
+            RecognizeImage(sub.path(), output);
+            ++file_counter_;
         }
     }
 }
 
-void RequestHandler::RecognizeImage(const path& target_path, std::ostream& output, const int* n) {
-    if (n) {
-        output << std::endl << *n << ". "s;
+void RequestHandler::RecognizeImage(const std::filesystem::path& target_path, std::ostream& output) {
+    if (file_counter_ != -1) {
+        output << std::endl << file_counter_ << ". "s;
     }
     output << target_path.string() << std::endl;
 

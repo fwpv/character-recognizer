@@ -1,7 +1,9 @@
 #include "training_database.h"
 #include "bmp_image.h"
 
+#include <algorithm>
 #include <exception>
+#include <random>
 
 using namespace std::literals;
 
@@ -66,32 +68,39 @@ void TrainingDatabase::BuildFromFolder(const std::filesystem::path& folder) {
                 continue;
             }
             if (name.size() == 1) {
-                Data& data = data_dict_[name[0]];
+                Chars& data = data_dict_[name[0]];
                 for (const auto& file : directory_iterator(sub)) {
-                    data.push_back(file_normalizer_->Load(file.path()));
+                    data.emplace_back(file_normalizer_->Load(file.path()));
                 }
             } else { // not symbols
                 for (const auto& file : directory_iterator(sub)) {
-                    non_char_data_.push_back(file_normalizer_->Load(file.path()));
+                    non_chars_.emplace_back(file_normalizer_->Load(file.path()));
                 }
             }
         }
     }
 }
 
-const TrainingDatabase::DataDict& TrainingDatabase::GetDataDictionary() const {
+const TrainingDatabase::CharsDict& TrainingDatabase::GetCharsDictionary() const {
     return data_dict_;
 }
 
-const TrainingDatabase::Data& TrainingDatabase::GetNonCharData() const {
-    return non_char_data_;
+const TrainingDatabase::Chars& TrainingDatabase::GetNonChars() const {
+    return non_chars_;
 }
 
-std::vector<char> TrainingDatabase::GetUploadedChars() const {
-    std::vector<char> chars;
-    chars.reserve(data_dict_.size());
-    for (auto it : data_dict_) {
-        chars.push_back(it.first);
+TrainingDatabase::CharPtrArray TrainingDatabase::CreateCharPtrArray() const {
+    TrainingDatabase::CharPtrArray result;
+    for (auto& it : data_dict_) {
+        char c = it.first;
+        for (auto& vec : it.second) {
+            result.emplace_back(c, &vec);
+        }
     }
-    return chars;
+    return result;
+}
+
+void TrainingDatabase::ShuffleCharPtrArray(TrainingDatabase::CharPtrArray& array) {
+    auto rnd = std::default_random_engine {};
+    std::shuffle(array.begin(), array.end(), rnd);
 }
