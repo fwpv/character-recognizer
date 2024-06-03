@@ -160,7 +160,7 @@ const std::string help_string =
     "    -cycles - Number of training cycles. Default value is 1000.\n\n"
     "    -algorithm - Training algorithm. Default value is 1. Algorithms\n"
     "     0 (sequential), 1 (shuffled), 2 (shuffled_with_not_sym) are supported.\n\n"
-    "    -h_n - The number of neurons in each hidden layer. Default value is 32.\n\n"
+    "    -h_n - The number of neurons in each hidden layer. Default value is 128.\n\n"
     "2. recognize - Loads the neural network data and recognizes an image or\n"
     "a folder with images.\n\n"
     "Options:\n"
