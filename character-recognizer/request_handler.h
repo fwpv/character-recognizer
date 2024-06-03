@@ -12,7 +12,8 @@ class RequestHandler {
 public:
     enum Algorithm {
         SEQUENTIALLY,
-        SHUFFLED
+        SHUFFLED,
+        SHUFFLED_WITH_NOT_SYM
     };
 
     void CreateNewSnn();

@@ -66,9 +66,10 @@ void RequestHandler::Train(int cycles, std::ostream& progress_output) {
     std::vector<float> resources(10, 0.0f);
 
     TrainingDatabase::CharPtrArray char_ptr_array = db_->CreateCharPtrArray();
+    const TrainingDatabase::Chars& not_chars = db_->GetNonChars();
     progress_output << 0;
     for (int i = 0; i < cycles; ++i) {
-        if (algorithm_ == SHUFFLED) {
+        if (algorithm_ == SHUFFLED || algorithm_ == SHUFFLED_WITH_NOT_SYM) {
             TrainingDatabase::ShuffleCharPtrArray(char_ptr_array);
         }
         for (auto [c, vec_ptr] : char_ptr_array) {
@@ -76,6 +77,13 @@ void RequestHandler::Train(int cycles, std::ostream& progress_output) {
             snn_->CalculateOutput(*vec_ptr);
             set_unit(resources, number);
             snn_->PropagateErrorBack(resources);
+            
+            if (!not_chars.empty() && algorithm_ == SHUFFLED_WITH_NOT_SYM) {
+                auto& ns_vec = not_chars[rand() % not_chars.size()];
+                snn_->CalculateOutput(ns_vec);
+                clear(resources);
+                snn_->PropagateErrorBack(resources);
+            }
         }
         progress_output << '\r';
         progress_output << i + 1;

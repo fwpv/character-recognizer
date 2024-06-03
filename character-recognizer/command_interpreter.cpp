@@ -93,10 +93,10 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
 
             } else if (name == "algorithm"sv) {
                 int algorithm = StringViewToInt(value);
-                if (algorithm != RequestHandler::SEQUENTIALLY
-                    && algorithm != RequestHandler::SHUFFLED) {
-                    throw std::invalid_argument("Only algorithms 0 (sequential) "
-                        "and 1 (shuffled) are supported"s);
+                if (algorithm < RequestHandler::SEQUENTIALLY
+                    || algorithm > RequestHandler::SHUFFLED_WITH_NOT_SYM) {
+                    throw std::invalid_argument("Only algorithms 0 (sequential), "
+                        "1 (shuffled), 2 (shuffled_with_not_sym) are supported"s);
                 }
                 train_command.algorithm = static_cast<RequestHandler::Algorithm>(algorithm);
 

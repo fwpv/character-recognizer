@@ -36,7 +36,7 @@ Creates a new neural network and trains it with images from the folder.
 - `-db_path="..."` - Path to the folder with images. Default value is `"training_chars"`.
 - `-path_to_save="..."` - Path to save the trained neural network data. Default value is `"snn_data"`.
 - `-cycles=...` - Number of training cycles. Default value is `1000`.
-- `-algorithm=...` - Training algorithm. Default value is `1`. Currently, only algorithms 0 (sequential) and 1 (shuffled) are supported.
+- `-algorithm=...` - Training algorithm. Default value is `1`. Currently, only algorithms 0 (sequential), 1 (shuffled), 2 (shuffled_with_not_sym) are supported.
 
 **Example:**
 ```sh
