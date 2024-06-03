@@ -24,7 +24,7 @@ To build the program, you need CMake and a C++ compiler.
 
 - All paths must contain only English characters.
 - Images for training and recognition: BMP format, 8 or 24 bits per pixel, height 32, width 32.
-- The training images folder should contain subfolders named from '0' to '9' (these are the names of the recognizable characters). Each subfolder should contain BMP images sized 32x32. The names and number of images in each subfolder can be any.
+- The training images folder should contain subfolders named from '0' to '9' (these are the names of the recognizable characters). Each subfolder should contain BMP images sized 32x32. The names and number of images in each subfolder can be any. The contents of subfolders with other names will fall into the category of non-characters.
 
 ## Commands
 
