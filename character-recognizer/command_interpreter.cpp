@@ -137,13 +137,38 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
     return command;
 }
 
+const std::string help_string = 
+    "Commands\n\n"
+    "1. train - Creates a new neural network and trains it with images\n"
+    "from the folder.\n\n"
+    "Options:\n"
+    "    -snn_data_path - Path to the pre-trained neural network.\n"
+    "    Default value is an empty string, which creates an untrained\n"
+    "    neural network.\n\n"
+    "    -db_path - Path to the folder with images. Default value\n"
+    "    is \"training_chars\".\n\n"
+    "    -path_to_save= - Path to save the trained neural network data.\n"
+    "    Default value is \"snn_data\".\n\n"
+    "    -cycles - Number of training cycles. Default value is 1000.\n\n"
+    "    -algorithm - Training algorithm. Default value is 1. Algorithms\n"
+    "     0 (sequential), 1 (shuffled), 2 (shuffled_with_not_sym) are supported.\n\n"
+    "2. recognize - Loads the neural network data and recognizes an image or\n"
+    "a folder with images.\n\n"
+    "Options:\n"
+    "    -snn_data_path - Path to the pre-trained neural network. Default value\n"
+    "    is \"snn_data\".\n\n"
+    "    -target_path - Path to the image file or folder with images for\n"
+    "    recognition. Default value is \"target_chars\".\n\n"
+    "    -result_path - Path to save the report as a text file. If not specified,\n"
+    "    the report will be displayed in the terminal. Default value is\n"
+    "    an empty string."s;
+
 void InterpretCommand(Command command) {
     RequestHandler handler;
 
     if (std::holds_alternative<HelpCommand>(command)) {
         HelpCommand help_command = std::get<HelpCommand>(command);
-        std::cout << "Command: help"s << std::endl;
-        std::cout << "<A little text with help information>"s << std::endl;
+        std::cout << help_string << std::endl;
         
     } else if (std::holds_alternative<TrainCommand>(command)) {
         TrainCommand train_command = std::get<TrainCommand>(command);
