@@ -100,6 +100,14 @@ Command ParseStrings(const std::vector<std::string_view>& strings) {
                 }
                 train_command.algorithm = static_cast<RequestHandler::Algorithm>(algorithm);
 
+            } else if (name == "h_n"sv) {
+                int h_n = StringViewToInt(value);
+                if (h_n < 1) {
+                    throw std::invalid_argument("The number of neurons in each hidden "
+                        "layer must be greater than 0"s);
+                }
+                train_command.hidden_neurons = h_n;
+
             } else {
                 throw ParsingError("Unsupported parameter '"s
                         + std::string(name) + "'"s);
@@ -152,6 +160,7 @@ const std::string help_string =
     "    -cycles - Number of training cycles. Default value is 1000.\n\n"
     "    -algorithm - Training algorithm. Default value is 1. Algorithms\n"
     "     0 (sequential), 1 (shuffled), 2 (shuffled_with_not_sym) are supported.\n\n"
+    "    -h_n - The number of neurons in each hidden layer. Default value is 32.\n\n"
     "2. recognize - Loads the neural network data and recognizes an image or\n"
     "a folder with images.\n\n"
     "Options:\n"
@@ -173,7 +182,7 @@ void InterpretCommand(Command command) {
     } else if (std::holds_alternative<TrainCommand>(command)) {
         TrainCommand train_command = std::get<TrainCommand>(command);
         if (train_command.snn_data_path.empty()) {
-            handler.CreateNewSnn();
+            handler.CreateNewSnn(train_command.hidden_neurons);
         } else {
             handler.LoadSnn(train_command.snn_data_path);
         }

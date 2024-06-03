@@ -16,7 +16,7 @@ public:
         SHUFFLED_WITH_NOT_SYM
     };
 
-    void CreateNewSnn();
+    void CreateNewSnn(int hidden_neurons);
     void LoadSnn(const std::filesystem::path& snn_data_path);
     void SaveSnn(const std::filesystem::path& path_to_save) const;
     void LoadDb(const std::filesystem::path& db_path);
