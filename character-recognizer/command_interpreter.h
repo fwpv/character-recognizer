@@ -21,7 +21,7 @@ struct TrainCommand {
     std::string path_to_save = "snn_data"s;
     int training_cycles = 1000;
     RequestHandler::Algorithm algorithm = RequestHandler::SHUFFLED;
-    int hidden_neurons = 32;
+    int hidden_neurons = 128;
 };
 
 struct RecognizeCommand {
