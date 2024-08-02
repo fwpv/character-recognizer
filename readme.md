@@ -13,9 +13,9 @@ To build the program, you need CMake and a C++ compiler.
     mkdir build
     cd build
     ```
-4. Run CMake. Example for Windows and MinGW compiler:
+4. Run CMake.
     ```sh
-    cmake ../ -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+    cmake ../ -DCMAKE_BUILD_TYPE=Release
     cmake --build .
     ```
     Alternatively, you can build in VSCode with the CMake Tools extension or in any other development environment that supports CMake.
@@ -32,28 +32,29 @@ To build the program, you need CMake and a C++ compiler.
 Creates a new neural network and trains it with images from the folder.
 
 **Options:**
-- `-snn_data_path="..."` - Path to the pre-trained neural network. Default value is an empty string, which creates an untrained neural network.
-- `-db_path="..."` - Path to the folder with images. Default value is `"training_chars"`.
-- `-path_to_save="..."` - Path to save the trained neural network data. Default value is `"snn_data"`.
-- `-cycles=...` - Number of training cycles. Default value is `1000`.
-- `-algorithm=...` - Training algorithm. Default value is `1`. Currently, only algorithms 0 (sequential), 1 (shuffled), 2 (shuffled_with_not_sym) are supported.
+- `-snn_data_path` - Path to the pre-trained neural network. Default value is an empty string, which creates an untrained neural network.
+- `-db_path` - Path to the folder with images. Default value is `"training_chars"`.
+- `-path_to_save` - Path to save the trained neural network data. Default value is `"snn_data"`.
+- `-cycles` - Number of training cycles. Default value is `1000`.
+- `-algorithm` - Training algorithm. Default value is `1`. Currently, only algorithms 0 (sequential), 1 (shuffled), 2 (shuffled_with_not_sym) are supported.
+- `-h_n` - The number of neurons in each hidden layer. Default value is 128.
 
 **Example:**
 ```sh
-recognizer.exe train -db_path="training_chars" -path_to_save="snn_data_500" -cycles=500
+recognizer train -db_path="training_chars" -path_to_save="snn_data_500" -cycles=500
 ```
 
 ### 2. `recognize`
 Loads the neural network data and recognizes an image or a folder with images.
 
 **Options:**
-- `-snn_data_path="..."` - Path to the pre-trained neural network. Default value is `"snn_data"`.
-- `-target_path="..."` - Path to the image file or folder with images for recognition. Default value is `"target_chars"`.
-- `-result_path="..."` - Path to save the report as a text file. If not specified, the report will be displayed in the terminal. Default value is an empty string.
+- `-snn_data_path` - Path to the pre-trained neural network. Default value is `"snn_data"`.
+- `-target_path` - Path to the image file or folder with images for recognition. Default value is `"target_chars"`.
+- `-result_path` - Path to save the report as a text file. If not specified, the report will be displayed in the terminal. Default value is an empty string.
 
 **Example:**
 ```sh
-recognizer.exe recognize -snn_data_path="snn_data_500" -target_path="target_chars" -result_path="result.txt"
+recognizer recognize -snn_data_path="snn_data_500" -target_path="target_chars" -result_path="result.txt"
 ```
 
 ### 3. `help`
