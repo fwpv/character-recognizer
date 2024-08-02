@@ -2,7 +2,6 @@
 #include "bmp_image.h"
 
 #include <algorithm>
-#include <exception>
 #include <random>
 
 using namespace std::literals;
@@ -32,7 +31,7 @@ std::vector<float> ImageFileNormalizer::Load(const std::filesystem::path& file) 
                | static_cast<uint32_t>(color.g) << 16
                | static_cast<uint32_t>(color.b) << 8;
 
-        return static_cast<float>(uval) / UINT32_MAX;
+        return static_cast<float>(uval) / static_cast<float>(UINT32_MAX);
     };
 
     std::vector<float> vec(input_width_);

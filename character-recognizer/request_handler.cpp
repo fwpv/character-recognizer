@@ -1,15 +1,12 @@
 #include "request_handler.h"
-#include "profiler.h"
 #include "snn.h"
 #include "state_saver.h"
 #include "training_database.h"
 
 #include <algorithm>
 #include <cassert>
-#include <conio.h> 
 #include <iomanip>
 #include <iostream>
-#include <random>
 #include <vector>
 
 using namespace std::literals;
@@ -85,8 +82,7 @@ void RequestHandler::Train(int cycles, std::ostream& progress_output) {
                 snn_->PropagateErrorBack(resources);
             }
         }
-        progress_output << '\r';
-        progress_output << i + 1;
+        progress_output << '\r' << i + 1 << std::flush;
     }
     progress_output << std::endl;
 }

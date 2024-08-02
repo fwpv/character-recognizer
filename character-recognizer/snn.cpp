@@ -267,7 +267,7 @@ void Propagate() {
         snn.CalculateOutput(resources);
         const std::vector<float>& output = snn.ReadOutput();
         auto it = std::max_element(output.begin(), output.end());
-        size_t index = it - output.begin();
+        size_t index = it - output.begin(); // NOLINT
         assert(index == 9 - i);
     }
 }
